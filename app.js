@@ -598,6 +598,9 @@ checkoutForm.addEventListener('submit', (e) => {
     }
     saveCart();
     
+    // Alert the user
+    alert("Apka order receive ho gaya hai!");
+    
     // Toggle screens
     closeCheckout();
     successModal.classList.add('open');
