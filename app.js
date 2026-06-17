@@ -44,11 +44,58 @@ const products = {
             5: 1400,
             10: 2650
         }
+    },
+    fajri: {
+        name: "Fajri Mango",
+        image: "assets/fajri.png",
+        prices: {
+            5: 1550,
+            10: 2950
+        }
+    },
+    ratol_no12: {
+        name: "Ratol No. 12 Mango",
+        image: "assets/ratol_no12.png",
+        prices: {
+            5: 1750,
+            10: 3300
+        }
+    },
+    sobay_ki_ting: {
+        name: "Sobay Ki Ting Mango",
+        image: "assets/sobay_ki_ting.png",
+        prices: {
+            5: 1950,
+            10: 3700
+        }
+    },
+    multani_chaunsa: {
+        name: "Multani Chaunsa Mango",
+        image: "assets/multani_chaunsa.png",
+        prices: {
+            5: 1700,
+            10: 3200
+        }
     }
+};
+
+const productCategories = {
+    sindhri: ['bestseller'],
+    anwar_ratol: ['sweet'],
+    langra: [],
+    dasehri: ['sweet'],
+    chaunsa: ['bestseller', 'sweet'],
+    fajri: [],
+    ratol_no12: ['premium'],
+    sobay_ki_ting: ['premium'],
+    multani_chaunsa: ['premium', 'sweet']
 };
 
 // 2. STATE MANAGEMENT
 let cart = [];
+let activePromo = null;
+let activeFilter = 'all';
+let searchQuery = '';
 
 // Load cart from LocalStorage on load
 function initCart() {
@@ -60,12 +107,117 @@ function initCart() {
             cart = [];
         }
     }
+    initPromo();
     updateCartUI();
 }
 
 function saveCart() {
     localStorage.setItem('anf_cart', JSON.stringify(cart));
     updateCartUI();
+}
+
+// 2.1 PROMO CODE & COUPON LOGIC
+const PROMO_CODES = {
+    'ALNOOR10': 0.10, // 10% discount
+    'MANGO15': 0.15,  // 15% discount
+    'FRESH5': 0.05    // 5% discount
+};
+
+function initPromo() {
+    const applyPromoBtn = document.getElementById('apply-promo-btn');
+    const promoInput = document.getElementById('promo-input');
+    
+    const savedPromo = localStorage.getItem('anf_promo');
+    if (savedPromo) {
+        try {
+            activePromo = JSON.parse(savedPromo);
+            if (promoInput) promoInput.value = activePromo.code;
+            showPromoMsg(`Promo code "${activePromo.code}" applied.`, "success");
+        } catch (e) {
+            activePromo = null;
+        }
+    }
+    
+    if (applyPromoBtn && promoInput) {
+        applyPromoBtn.addEventListener('click', () => {
+            const code = promoInput.value.trim().toUpperCase();
+            if (code === '') {
+                activePromo = null;
+                localStorage.removeItem('anf_promo');
+                showPromoMsg("Please enter a promo code.", "error");
+                updateCartUI();
+                return;
+            }
+            
+            if (PROMO_CODES.hasOwnProperty(code)) {
+                activePromo = {
+                    code: code,
+                    discountRate: PROMO_CODES[code]
+                };
+                localStorage.setItem('anf_promo', JSON.stringify(activePromo));
+                showPromoMsg(`Promo code "${code}" applied successfully!`, "success");
+            } else {
+                activePromo = null;
+                localStorage.removeItem('anf_promo');
+                showPromoMsg("Invalid promo code.", "error");
+            }
+            updateCartUI();
+        });
+    }
+}
+
+function showPromoMsg(msg, type) {
+    const promoMessage = document.getElementById('promo-message');
+    if (promoMessage) {
+        promoMessage.textContent = msg;
+        promoMessage.className = `promo-msg ${type}`;
+    }
+}
+
+// 2.2 PRODUCT SEARCH & CATEGORY FILTER LOGIC
+function initFilters() {
+    const searchInput = document.getElementById('catalog-search');
+    const filterTabs = document.querySelectorAll('.filter-tab');
+    
+    if (searchInput) {
+        searchInput.addEventListener('input', (e) => {
+            searchQuery = e.target.value.toLowerCase().trim();
+            filterProducts();
+        });
+    }
+    
+    filterTabs.forEach(tab => {
+        tab.addEventListener('click', () => {
+            filterTabs.forEach(t => t.classList.remove('active'));
+            tab.classList.add('active');
+            activeFilter = tab.getAttribute('data-filter');
+            filterProducts();
+        });
+    });
+}
+
+function filterProducts() {
+    const productCards = document.querySelectorAll('.product-card');
+    
+    productCards.forEach(card => {
+        const productId = card.getAttribute('data-id');
+        const productInfo = products[productId];
+        const categories = productCategories[productId] || [];
+        
+        if (!productInfo) return;
+        
+        const matchesSearch = productInfo.name.toLowerCase().includes(searchQuery) || 
+                              productInfo.name.toLowerCase().replace("mango", "").trim().includes(searchQuery) ||
+                              productId.toLowerCase().replace("_", " ").includes(searchQuery);
+        
+        const matchesFilter = (activeFilter === 'all') || categories.includes(activeFilter);
+        
+        if (matchesSearch && matchesFilter) {
+            card.style.display = 'flex';
+        } else {
+            card.style.display = 'none';
+        }
+    });
 }
 
 // 3. UI CONTROLS & STYLING LOGIC
@@ -130,18 +282,47 @@ document.querySelectorAll('.product-card').forEach(card => {
     const weightButtons = card.querySelectorAll('.weight-btn');
     const priceValSpan = card.querySelector('.price-val');
     
+    // Card Quantity Handler
+    const cardQtyVal = card.querySelector('.card-qty-val');
+    const cardQtyMinus = card.querySelector('.card-qty-btn.minus');
+    const cardQtyPlus = card.querySelector('.card-qty-btn.plus');
+    
+    function updateCardPrice() {
+        const activeWeightBtn = card.querySelector('.weight-btn.active');
+        if (!activeWeightBtn) return;
+        const weight = parseInt(activeWeightBtn.getAttribute('data-weight'));
+        const basePrice = products[productId].prices[weight];
+        const qty = cardQtyVal ? parseInt(cardQtyVal.textContent) : 1;
+        const totalPrice = basePrice * qty;
+        if (priceValSpan) {
+            priceValSpan.textContent = totalPrice.toLocaleString();
+        }
+    }
+    
     weightButtons.forEach(btn => {
         btn.addEventListener('click', () => {
             // Toggle active styling
             weightButtons.forEach(b => b.classList.remove('active'));
             btn.classList.add('active');
             
-            // Get selected weight & update price
-            const weight = parseInt(btn.getAttribute('data-weight'));
-            const price = products[productId].prices[weight];
-            priceValSpan.textContent = price.toLocaleString();
+            updateCardPrice();
         });
     });
+    
+    if (cardQtyVal && cardQtyMinus && cardQtyPlus) {
+        cardQtyMinus.addEventListener('click', () => {
+            let qty = parseInt(cardQtyVal.textContent);
+            if (qty > 1) {
+                cardQtyVal.textContent = qty - 1;
+                updateCardPrice();
+            }
+        });
+        cardQtyPlus.addEventListener('click', () => {
+            let qty = parseInt(cardQtyVal.textContent);
+            cardQtyVal.textContent = qty + 1;
+            updateCardPrice();
+        });
+    }
     
     // Add to Cart Button Listener
     const addToCartBtn = card.querySelector('.add-to-cart-btn');
@@ -149,7 +330,12 @@ document.querySelectorAll('.product-card').forEach(card => {
         addToCartBtn.addEventListener('click', () => {
             const activeWeightBtn = card.querySelector('.weight-btn.active');
             const weight = parseInt(activeWeightBtn.getAttribute('data-weight'));
-            addToCart(productId, weight);
+            const qty = cardQtyVal ? parseInt(cardQtyVal.textContent) : 1;
+            addToCart(productId, weight, qty);
+            if (cardQtyVal) {
+                cardQtyVal.textContent = 1;
+                updateCardPrice();
+            }
             openCartDrawer();
         });
     }
@@ -160,14 +346,19 @@ document.querySelectorAll('.product-card').forEach(card => {
         buyNowBtn.addEventListener('click', () => {
             const activeWeightBtn = card.querySelector('.weight-btn.active');
             const weight = parseInt(activeWeightBtn.getAttribute('data-weight'));
-            addToCart(productId, weight);
+            const qty = cardQtyVal ? parseInt(cardQtyVal.textContent) : 1;
+            addToCart(productId, weight, qty);
+            if (cardQtyVal) {
+                cardQtyVal.textContent = 1;
+                updateCardPrice();
+            }
             openCheckoutFlow();
         });
     }
 });
 
 // 4. CART CORE ACTIONS
-function addToCart(productId, weight) {
+function addToCart(productId, weight, quantity = 1) {
     const productInfo = products[productId];
     const price = productInfo.prices[weight];
     
@@ -175,7 +366,7 @@ function addToCart(productId, weight) {
     const existingIndex = cart.findIndex(item => item.id === productId && item.weight === weight);
     
     if (existingIndex > -1) {
-        cart[existingIndex].quantity += 1;
+        cart[existingIndex].quantity += quantity;
     } else {
         cart.push({
             id: productId,
@@ -183,7 +374,7 @@ function addToCart(productId, weight) {
             weight: weight,
             price: price,
             image: productInfo.image,
-            quantity: 1
+            quantity: quantity
         });
     }
     saveCart();
@@ -260,7 +451,24 @@ function updateCartUI() {
         
         cartBadge.textContent = totalItems;
         cartSubtotal.textContent = `Rs. ${subtotal.toLocaleString()}`;
-        cartTotal.textContent = `Rs. ${subtotal.toLocaleString()}`;
+        
+        // Handle Active Promo Discount
+        const discountRow = document.getElementById('discount-row');
+        const discountPercent = document.getElementById('discount-percent');
+        const cartDiscount = document.getElementById('cart-discount');
+        let discount = 0;
+        
+        if (activePromo) {
+            discount = Math.round(subtotal * activePromo.discountRate);
+            if (discountRow) discountRow.style.display = 'flex';
+            if (discountPercent) discountPercent.textContent = (activePromo.discountRate * 100).toString();
+            if (cartDiscount) cartDiscount.textContent = `-Rs. ${discount.toLocaleString()}`;
+        } else {
+            if (discountRow) discountRow.style.display = 'none';
+        }
+        
+        const finalTotal = subtotal - discount;
+        cartTotal.textContent = `Rs. ${finalTotal.toLocaleString()}`;
     }
 }
 
@@ -291,6 +499,10 @@ function renderCheckoutSummary() {
     const summaryAdvance = document.getElementById('summary-advance');
     const summaryCod = document.getElementById('summary-cod');
     
+    const summaryDiscountRow = document.getElementById('summary-discount-row');
+    const summaryDiscountPercent = document.getElementById('summary-discount-percent');
+    const summaryDiscountVal = document.getElementById('summary-discount-val');
+    
     let subtotal = 0;
     summaryList.innerHTML = '';
     
@@ -305,7 +517,17 @@ function renderCheckoutSummary() {
         summaryList.appendChild(row);
     });
     
-    const total = subtotal;
+    let discount = 0;
+    if (activePromo) {
+        discount = Math.round(subtotal * activePromo.discountRate);
+        if (summaryDiscountRow) summaryDiscountRow.style.display = 'flex';
+        if (summaryDiscountPercent) summaryDiscountPercent.textContent = (activePromo.discountRate * 100).toString();
+        if (summaryDiscountVal) summaryDiscountVal.textContent = `-Rs. ${discount.toLocaleString()}`;
+    } else {
+        if (summaryDiscountRow) summaryDiscountRow.style.display = 'none';
+    }
+    
+    const total = subtotal - discount;
     const advance = Math.round(total * 0.50);
     const cod = total - advance;
     
@@ -332,10 +554,15 @@ checkoutForm.addEventListener('submit', (e) => {
     const orderId = 'ANF-' + Math.floor(100000 + Math.random() * 900000);
     
     // Calculations
-    let totalBill = 0;
+    let subtotal = 0;
     cart.forEach(item => {
-        totalBill += (item.price * item.quantity);
+        subtotal += (item.price * item.quantity);
     });
+    let discount = 0;
+    if (activePromo) {
+        discount = Math.round(subtotal * activePromo.discountRate);
+    }
+    const totalBill = subtotal - discount;
     const advance = Math.round(totalBill * 0.5);
     const cod = totalBill - advance;
     
@@ -354,6 +581,15 @@ checkoutForm.addEventListener('submit', (e) => {
     
     // Clear state
     cart = [];
+    activePromo = null;
+    localStorage.removeItem('anf_promo');
+    const promoInput = document.getElementById('promo-input');
+    if (promoInput) promoInput.value = '';
+    const promoMessage = document.getElementById('promo-message');
+    if (promoMessage) {
+        promoMessage.textContent = '';
+        promoMessage.className = 'promo-msg';
+    }
     saveCart();
     
     // Toggle screens
@@ -403,4 +639,30 @@ function generateWhatsAppLink(orderId, name, phone, email, address, city, provin
 // Initialize on window load
 window.addEventListener('DOMContentLoaded', () => {
     initCart();
+    initFilters();
+    
+    // FAQ Accordion Toggle Logic
+    const faqTriggers = document.querySelectorAll('.faq-trigger');
+    faqTriggers.forEach(trigger => {
+        trigger.addEventListener('click', () => {
+            const item = trigger.closest('.faq-item');
+            const panel = item.querySelector('.faq-panel');
+            
+            const isActive = item.classList.toggle('active');
+            
+            if (isActive) {
+                panel.style.maxHeight = panel.scrollHeight + "px";
+            } else {
+                panel.style.maxHeight = "0px";
+            }
+            
+            // Close other items for a clean accordion experience
+            document.querySelectorAll('.faq-item').forEach(otherItem => {
+                if (otherItem !== item && otherItem.classList.contains('active')) {
+                    otherItem.classList.remove('active');
+                    otherItem.querySelector('.faq-panel').style.maxHeight = "0px";
+                }
+            });
+        });
+    });
 });
