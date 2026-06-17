@@ -3,6 +3,9 @@
 // E-commerce cart, checkout, payment calculation & WhatsApp order routing.
 // ==========================================================================
 
+// Web3Forms API Access Key (Replace with your actual key from web3forms.com)
+const WEB3FORMS_ACCESS_KEY = "YOUR_WEB3FORMS_ACCESS_KEY";
+
 // 1. DATA CONFIGURATION
 const products = {
     sindhri: {
@@ -579,6 +582,9 @@ checkoutForm.addEventListener('submit', (e) => {
     const whatsappBtn = document.getElementById('send-whatsapp-receipt-btn');
     whatsappBtn.href = whatsappLink;
     
+    // Send email notification to owner
+    sendEmailNotification(orderId, name, phone, email, address, city, province, totalBill, advance, cod);
+    
     // Clear state
     cart = [];
     activePromo = null;
@@ -634,6 +640,76 @@ function generateWhatsAppLink(orderId, name, phone, email, address, city, provin
                     
     const encodedText = encodeURIComponent(rawText);
     return `https://wa.me/923079661669?text=${encodedText}`;
+}
+
+// Helper: Sends email notification on order booking using Web3Forms API
+function sendEmailNotification(orderId, name, phone, email, address, city, province, totalBill, advance, cod) {
+    if (WEB3FORMS_ACCESS_KEY === "YOUR_WEB3FORMS_ACCESS_KEY") {
+        console.warn("Web3Forms Access Key is not configured. Email notification skipped.");
+        return;
+    }
+    
+    // Load current order contents before they are cleared from state
+    const savedCart = localStorage.getItem('anf_cart');
+    let items = [];
+    if (savedCart) {
+        try {
+            items = JSON.parse(savedCart);
+        } catch (e) {
+            items = cart;
+        }
+    } else {
+        items = cart;
+    }
+    
+    let orderDetailsText = '';
+    items.forEach((item, index) => {
+        orderDetailsText += `${index + 1}. ${item.name} (${item.weight} Kg Box) x ${item.quantity} = Rs. ${(item.price * item.quantity).toLocaleString()}\n`;
+    });
+    
+    const emailData = {
+        access_key: WEB3FORMS_ACCESS_KEY,
+        subject: `New Order Booking [${orderId}] - Al Noor Farm`,
+        from_name: "Al Noor Farm Web App",
+        name: name,
+        email: email,
+        phone: phone,
+        message: `
+Order Reference ID: ${orderId}
+Customer Name: ${name}
+Phone/WhatsApp: ${phone}
+Email: ${email}
+Delivery Address: ${address}, ${city}, ${province}
+
+Order Details:
+${orderDetailsText}
+
+Billing Summary:
+- Total Bill: Rs. ${totalBill.toLocaleString()}
+- 50% Required Advance: Rs. ${advance.toLocaleString()}
+- 50% Cash on Delivery: Rs. ${cod.toLocaleString()}
+        `.trim()
+    };
+
+    fetch('https://api.web3forms.com/submit', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json'
+        },
+        body: JSON.stringify(emailData)
+    })
+    .then(res => res.json())
+    .then(data => {
+        if (data.success) {
+            console.log("Email notification sent successfully.");
+        } else {
+            console.error("Failed to send email via Web3Forms:", data.message);
+        }
+    })
+    .catch(err => {
+        console.error("Error sending email notification:", err);
+    });
 }
 
 // Initialize on window load
