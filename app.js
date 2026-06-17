@@ -4,7 +4,7 @@
 // ==========================================================================
 
 // Web3Forms API Access Key (Replace with your actual key from web3forms.com)
-const WEB3FORMS_ACCESS_KEY = "YOUR_WEB3FORMS_ACCESS_KEY";
+const WEB3FORMS_ACCESS_KEY = "e042e2a8-df88-49fe-83e0-e2678aa0a691";
 
 // 1. DATA CONFIGURATION
 const products = {
