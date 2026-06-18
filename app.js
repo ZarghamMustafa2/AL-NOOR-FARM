@@ -8,90 +8,63 @@ const WEB3FORMS_ACCESS_KEY = "e042e2a8-df88-49fe-83e0-e2678aa0a691";
 
 // 1. DATA CONFIGURATION
 const products = {
-    sindhri: {
-        name: "Sindhri Mango",
-        image: "assets/sindhri.png",
-        prices: {
-            5: 1450,
-            10: 2750
-        }
-    },
     anwar_ratol: {
-        name: "Anwar Ratol Mango",
-        image: "assets/anwar_ratol.png",
+        name: "Anwar Ratol Mango (Pre-book) Tentative Harvesting 29th June",
+        image: "assets/anwar_ratol_gardezi.png",
         prices: {
-            5: 1850,
-            10: 3500
+            5: 3050,
+            10: 5800
         }
     },
     chaunsa: {
-        name: "Chaunsa Mango (White)",
-        image: "assets/chaunsa.png",
+        name: "Chaunsa Mango (Pre-book) Tentative Harvesting 20th July",
+        image: "assets/chaunsa_gardezi.png",
         prices: {
-            5: 1650,
-            10: 3100
+            5: 2950,
+            10: 5600
+        }
+    },
+    sindhri: {
+        name: "Sindhri Mango (Pre-book) Tentative Harvesting 20th June",
+        image: "assets/sindhri_gardezi.png",
+        prices: {
+            5: 2850,
+            10: 5400
         }
     },
     dasehri: {
-        name: "Dasehri Mango",
-        image: "assets/dasehri.png",
+        name: "Dasheri Mango (Available Now)",
+        image: "assets/dasehri_gardezi.png",
         prices: {
-            5: 1500,
-            10: 2850
+            5: 2550,
+            10: 4800
         }
     },
     langra: {
-        name: "Langra Mango",
-        image: "assets/langra.png",
+        name: "Langra Mango (Available Now)",
+        image: "assets/langra_gardezi.png",
         prices: {
-            5: 1400,
-            10: 2650
-        }
-    },
-    fajri: {
-        name: "Fajri Mango",
-        image: "assets/fajri.png",
-        prices: {
-            5: 1550,
-            10: 2950
+            5: 2550,
+            10: 4800
         }
     },
     ratol_no12: {
-        name: "Ratol No. 12 Mango",
-        image: "assets/ratol_no12.png",
+        name: "12 no. Ratol Mango (Pre-book) Tentative Harvesting 24th August",
+        image: "assets/ratol_no12_gardezi.png",
         prices: {
-            5: 1750,
-            10: 3300
-        }
-    },
-    sobay_ki_ting: {
-        name: "Sobay Ki Ting Mango",
-        image: "assets/sobay_ki_ting.png",
-        prices: {
-            5: 1950,
-            10: 3700
-        }
-    },
-    multani_chaunsa: {
-        name: "Multani Chaunsa Mango",
-        image: "assets/multani_chaunsa.png",
-        prices: {
-            5: 1700,
-            10: 3200
+            5: 3250,
+            10: 6200
         }
     }
 };
 
 const productCategories = {
-    sindhri: ['bestseller'],
     anwar_ratol: ['sweet'],
-    langra: [],
-    dasehri: ['sweet'],
     chaunsa: ['bestseller', 'sweet'],
-    fajri: [],
-    ratol_no12: ['premium'],
-    sobay_ki_ting: ['premium'],
-    multani_chaunsa: ['premium', 'sweet']
+    sindhri: ['bestseller'],
+    dasehri: ['sweet'],
+    langra: [],
+    ratol_no12: ['premium']
 };
 
 // 2. STATE MANAGEMENT

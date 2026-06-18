@@ -716,7 +716,15 @@ img {
 .product-title {
     font-size: 1.35rem;
     color: var(--primary-green);
-    margin-bottom: 10px;
+    margin-bottom: 6px;
+}
+
+.product-subtitle {
+    font-size: 0.85rem;
+    color: var(--accent-gold-dark);
+    font-weight: 700;
+    margin-bottom: 12px;
+    font-family: var(--font-primary);
 }
 
 .product-description {
