@@ -526,6 +526,11 @@ checkoutForm.addEventListener('submit', (e) => {
     const city = document.getElementById('cust-city').value.trim();
     const province = document.getElementById('cust-province').value;
     
+    // Retrieve payment method
+    const paymentMethodRadio = document.querySelector('input[name="payment_method"]:checked');
+    const paymentMethodValue = paymentMethodRadio ? paymentMethodRadio.value : 'cod';
+    const paymentMethodLabel = paymentMethodValue === 'bank' ? 'Bank Deposit / Transfer' : 'Cash on Delivery (COD)';
+    
     // Generate Random Order ID
     const orderId = 'ANF-' + Math.floor(100000 + Math.random() * 900000);
     
@@ -551,12 +556,12 @@ checkoutForm.addEventListener('submit', (e) => {
     document.getElementById('bank-advance-val').textContent = `Rs. ${advance.toLocaleString()}`;
     
     // Generate WhatsApp Pre-filled text and link
-    const whatsappLink = generateWhatsAppLink(orderId, name, phone, email, address, city, province, totalBill, advance, cod);
+    const whatsappLink = generateWhatsAppLink(orderId, name, phone, email, address, city, province, totalBill, advance, cod, paymentMethodLabel);
     const whatsappBtn = document.getElementById('send-whatsapp-receipt-btn');
     whatsappBtn.href = whatsappLink;
     
     // Send email notification to owner
-    sendEmailNotification(orderId, name, phone, email, address, city, province, totalBill, advance, cod);
+    sendEmailNotification(orderId, name, phone, email, address, city, province, totalBill, advance, cod, paymentMethodLabel);
     
     // Clear state
     cart = [];
@@ -584,7 +589,7 @@ successCloseBtn.addEventListener('click', () => {
 });
 
 // Helper: Formats string order summary and links to WhatsApp API
-function generateWhatsAppLink(orderId, name, phone, email, address, city, province, totalBill, advance, cod) {
+function generateWhatsAppLink(orderId, name, phone, email, address, city, province, totalBill, advance, cod, paymentMethod) {
     let orderDetailsText = '';
     
     // Load current order contents before clearing state
@@ -605,7 +610,8 @@ function generateWhatsAppLink(orderId, name, phone, email, address, city, provin
                     `*Customer Name:* ${name}\n` +
                     `*Phone:* ${phone}\n` +
                     `*Email:* ${email}\n` +
-                    `*Address:* ${address}, ${city}, ${province}\n\n` +
+                    `*Address:* ${address}, ${city}, ${province}\n` +
+                    `*Payment Method:* ${paymentMethod}\n\n` +
                     `*Order Details:*\n${orderDetailsText}\n` +
                     `*Billing Summary:*\n` +
                     `- *Total Bill:* Rs. ${totalBill.toLocaleString()}\n` +
@@ -619,7 +625,7 @@ function generateWhatsAppLink(orderId, name, phone, email, address, city, provin
 }
 
 // Helper: Sends email notification on order booking using Web3Forms API
-function sendEmailNotification(orderId, name, phone, email, address, city, province, totalBill, advance, cod) {
+function sendEmailNotification(orderId, name, phone, email, address, city, province, totalBill, advance, cod, paymentMethod) {
     if (WEB3FORMS_ACCESS_KEY === "YOUR_WEB3FORMS_ACCESS_KEY") {
         console.warn("Web3Forms Access Key is not configured. Email notification skipped.");
         return;
@@ -656,6 +662,7 @@ Customer Name: ${name}
 Phone/WhatsApp: ${phone}
 Email: ${email}
 Delivery Address: ${address}, ${city}, ${province}
+Payment Method: ${paymentMethod}
 
 Order Details:
 ${orderDetailsText}
@@ -688,10 +695,51 @@ Billing Summary:
     });
 }
 
+// Initialize Payment Method Toggle Actions
+function initPaymentMethodToggle() {
+    const codOption = document.querySelector('input[value="cod"]');
+    const bankOption = document.querySelector('input[value="bank"]');
+    const bankInstructions = document.getElementById('bank-instructions-box');
+    const paymentOptions = document.querySelectorAll('.payment-method-option');
+    
+    paymentOptions.forEach(option => {
+        const input = option.querySelector('input[type="radio"]');
+        if (input) {
+            input.addEventListener('change', () => {
+                // Remove active class from all options
+                paymentOptions.forEach(opt => opt.classList.remove('active'));
+                
+                // Add active class to checked option
+                if (input.checked) {
+                    option.classList.add('active');
+                }
+                
+                // Toggle instructions visibility
+                if (bankOption && bankOption.checked) {
+                    if (bankInstructions) bankInstructions.style.display = 'block';
+                } else {
+                    if (bankInstructions) bankInstructions.style.display = 'none';
+                }
+            });
+            
+            // Allow clicking anywhere on the card to toggle
+            option.addEventListener('click', (e) => {
+                if (e.target !== input) {
+                    input.checked = true;
+                    // Trigger the change event manually
+                    const changeEvent = new Event('change');
+                    input.dispatchEvent(changeEvent);
+                }
+            });
+        }
+    });
+}
+
 // Initialize on window load
 window.addEventListener('DOMContentLoaded', () => {
     initCart();
     initFilters();
+    initPaymentMethodToggle();
     
     // FAQ Accordion Toggle Logic
     const faqTriggers = document.querySelectorAll('.faq-trigger');
