@@ -615,7 +615,7 @@ function generateWhatsAppLink(orderId, name, phone, email, address, city, provin
                     `Here is my payment receipt screenshot of Rs. ${advance.toLocaleString()} for confirmation of booking. Please process my shipment. Thank you!`;
                     
     const encodedText = encodeURIComponent(rawText);
-    return `https://wa.me/923079661669?text=${encodedText}`;
+    return `https://wa.me/923268585661?text=${encodedText}`;
 }
 
 // Helper: Sends email notification on order booking using Web3Forms API
