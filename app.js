@@ -10,7 +10,7 @@ const WEB3FORMS_ACCESS_KEY = "e042e2a8-df88-49fe-83e0-e2678aa0a691";
 const products = {
     anwar_ratol: {
         name: "Anwar Ratol Mango (Pre-book) Tentative Harvesting 29th June",
-        image: "assets/anwar_ratol_gardezi.png",
+        image: "assets/anwar_ratol_alnoor.png",
         prices: {
             5: 3050,
             10: 5800
@@ -18,7 +18,7 @@ const products = {
     },
     chaunsa: {
         name: "Chaunsa Mango (Pre-book) Tentative Harvesting 20th July",
-        image: "assets/chaunsa_gardezi.png",
+        image: "assets/chaunsa_alnoor.png",
         prices: {
             5: 2950,
             10: 5600
@@ -26,7 +26,7 @@ const products = {
     },
     sindhri: {
         name: "Sindhri Mango (Pre-book) Tentative Harvesting 20th June",
-        image: "assets/sindhri_gardezi.png",
+        image: "assets/sindhri_alnoor.png",
         prices: {
             5: 2850,
             10: 5400
@@ -34,7 +34,7 @@ const products = {
     },
     dasehri: {
         name: "Dasheri Mango (Available Now)",
-        image: "assets/dasehri_gardezi.png",
+        image: "assets/dasehri_alnoor.png",
         prices: {
             5: 2550,
             10: 4800
@@ -42,7 +42,7 @@ const products = {
     },
     langra: {
         name: "Langra Mango (Available Now)",
-        image: "assets/langra_gardezi.png",
+        image: "assets/langra_alnoor.png",
         prices: {
             5: 2550,
             10: 4800
@@ -50,7 +50,7 @@ const products = {
     },
     ratol_no12: {
         name: "12 no. Ratol Mango (Pre-book) Tentative Harvesting 24th August",
-        image: "assets/ratol_no12_gardezi.png",
+        image: "assets/ratol_no12_alnoor.png",
         prices: {
             5: 3250,
             10: 6200
